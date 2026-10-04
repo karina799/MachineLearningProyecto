@@ -31,16 +31,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 ruta_xgb = BASE_DIR / "models" / "xgboost_final.joblib"
 
-models_dir = BASE_DIR / "models"
-
-if models_dir.exists():
-    st.write("Archivos en models:")
-    st.write(list(models_dir.iterdir()))
-
-if not ruta_xgb.exists():
-    st.error("No se encontró modelo_xgb.joblib")
-    st.stop()
-
 modelo_xgb = joblib.load(ruta_xgb)
 
 #Valores barrios
