@@ -27,12 +27,9 @@ st.set_page_config(
 )
 #Funcion para cargar
 
-from pathlib import Path
-import joblib
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ruta_xgb = BASE_DIR / "models" / "modelo_xgb.pkl"
+ruta_xgb = BASE_DIR / "models" / "modelo_xgb.joblib"
 
 modelo_xgb = joblib.load(ruta_xgb)
 
