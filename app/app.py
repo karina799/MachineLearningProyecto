@@ -33,6 +33,9 @@ ruta_xgb = BASE_DIR / "models" / "modelo_xgb.joblib"
 
 modelo_xgb = joblib.load(ruta_xgb)
 
+st.write("BASE_DIR:", BASE_DIR)
+st.write("Modelo:", ruta_xgb)
+st.write("Existe:", ruta_xgb.exists())
 
 #Valores barrios
 barrios = ['Can Baró', 'Diagonal Mar i el Front Marítim del Poblenou',
