@@ -1,1 +1,118 @@
-{"cells":[{"cell_type":"markdown","source":["# Aplicación Proyecto Final"],"metadata":{"id":"BQ7KBW-Cr47t"}},{"cell_type":"code","source":["!pip install streamlit -q"],"metadata":{"colab":{"base_uri":"https://localhost:8080/"},"id":"HKtKIc6CjuU4","executionInfo":{"status":"ok","timestamp":1791144971098,"user_tz":300,"elapsed":9862,"user":{"displayName":"karina Bósquez","userId":"12487892212269013365"}},"outputId":"ca2e4256-0e11-4e5f-d229-f759e82fec2a"},"execution_count":6,"outputs":[{"output_type":"stream","name":"stdout","text":["\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m10.3/10.3 MB\u001b[0m \u001b[31m45.7 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n","\u001b[2K   \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m11.4/11.4 MB\u001b[0m \u001b[31m61.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n","\u001b[?25h"]}]},{"cell_type":"code","execution_count":16,"metadata":{"colab":{"base_uri":"https://localhost:8080/"},"executionInfo":{"elapsed":14,"status":"ok","timestamp":1791145957824,"user":{"displayName":"karina Bósquez","userId":"12487892212269013365"},"user_tz":300},"id":"dRmZDf2cuEkR","outputId":"477df210-9e0a-437d-9ad8-ae8d53ca1c76"},"outputs":[{"output_type":"stream","name":"stdout","text":["Overwriting app.py\n"]}],"source":["%%writefile app.py\n","import joblib\n","import numpy as np\n","import pandas as pd\n","import streamlit as st\n","import shap\n","import matplotlib.pyplot as plt\n","from pathlib import Path\n","import tensorflow as tf\n","import os\n","\n","\n","#Configuración sitio\n","st.set_page_config(\n","    page_title=\"Predicción con Machine Learning\",\n","    layout=\"centered\"\n",")\n","#Funcion para cargar\n","\n","MODELS_PATH = Path(\"../models/\")\n","\n","#Valores barrios\n","barrios = ['Can Baró', 'Diagonal Mar i el Front Marítim del Poblenou',\n","       'Horta', 'Hostafrancs', 'Navas', 'Pedralbes', 'Porta',\n","       'Provençals del Poblenou', 'Sant Andreu', 'Sant Antoni',\n","       'Sant Gervasi - Galvany', 'Sant Gervasi - la Bonanova',\n","       'Sant Martí de Provençals',\n","       'Sant Pere, Santa Caterina i la Ribera', 'Sants', 'Sants - Badal',\n","       'Sarrià', 'Vallcarca i els Penitents',\n","       'Vallvidrera, el Tibidabo i les Planes',\n","       'Vilapicina i la Torre Llobeta', 'el Baix Guinardó',\n","       'el Barri Gòtic', 'el Besòs i el Maresme',\n","       \"el Camp d'en Grassot i Gràcia Nova\", \"el Camp de l'Arpa del Clot\",\n","       'el Carmel', 'el Clot', 'el Coll', 'el Congrés i els Indians',\n","       'el Fort Pienc', 'el Guinardó',\n","       'el Parc i la Llacuna del Poblenou', 'el Poble Sec', 'el Poblenou',\n","       'el Putxet i el Farró', 'el Raval', 'el Turó de la Peira',\n","       \"l'Antiga Esquerra de l'Eixample\", 'la Barceloneta', 'la Bordeta',\n","       \"la Dreta de l'Eixample\", \"la Font d'en Fargues\",\n","       'la Font de la Guatlla', 'la Guineueta', 'la Marina de Port',\n","       'la Maternitat i Sant Ramon', \"la Nova Esquerra de l'Eixample\",\n","       'la Prosperitat', 'la Sagrada Família', 'la Sagrera', 'la Salut',\n","       'la Teixonera', 'la Verneda i la Pau',\n","       'la Vila Olímpica del Poblenou', 'la Vila de Gràcia', 'les Corts',\n","       'les Roquetes', 'les Tres Torres']\n","\n","#Cargar Modelos\n","ruta_xgb = MODELS_PATH / \"xgboost_final.joblib\"\n","\n","modelo_xgb = joblib.load(ruta_xgb)\n","\n","#Interfaz\n","st.title(\"Aplicación de Predicción\")\n","st.write(\n","    \"Introduce los datos para obtener una predicción \"\n","    \"utilizando los modelos entrenados.\"\n",")\n","\n","with st.form(\"Barrio\"):\n","  Lag_7 = st.number_input(\"Ocupación hace 7 días\", 0.0, 1.0, 0.4)\n","  Lag_14 = st.number_input(\"Ocupación hace 14 días\", 0.0, 1.0, 0.4)\n","  Lag_28 = st.number_input(\"Ocupación hace 28 días\", 0.0, 1.0, 0.4)\n","  mes = st.selectbox(\n","        \"Mes\",\n","        options=list(range(1, 13)),\n","        format_func=lambda x: [\"Enero\", \"Febrero\", \"Marzo\", \"Abril\", \"Mayo\", \"Junio\", \"Julio\", \"Agosto\", \"Septiembre\", \"Octubre\", \"Noviembre\", \"Diciembre\"][x - 1]\n","    )\n","\n","  dia_semana = st.selectbox(\n","        \"Día de la semana\",\n","        options=list(range(7)),\n","        format_func=lambda x: [\"Lunes\", \"Martes\", \"Miércoles\", \"Jueves\",\"Viernes\", \"Sábado\", \"Domingo\"][x]\n","    )\n","  neighbourhood_cleansed = st.selectbox(\"Barrio\", options=barrios)\n","  enviar = st.form_submit_button(\"Predecir\")\n","\n","\n","#Predecir en caso de que usuario envie los datos\n","if enviar:\n","  fila = pd.DataFrame([{\n","      \"lag_7\": Lag_7,\n","      \"lag_14\": Lag_14,\n","      \"lag_28\": Lag_28,\n","      \"day_of_week\": mes,\n","      \"month\": dia_semana,\n","      \"neighbourhood_cleansed\": neighbourhood_cleansed\n","\n","  }])\n","\n","  #Predicción XGBoost\n","  pred_xgb = modelo_xgb.predict(fila)\n","  pre = modelo_xgb.named_steps[\"preprocessor\"]\n","  clf = modelo_xgb.named_steps[\"model\"]\n","\n","\n","  #Recultados\n","  st.subheader(\"Resultados\")\n","  st.metric(\"Predicción XGBoost:\", f\"{pred_xgb}:.1%\")\n","\n","  #SHAP Values\n","  datos_trans = pre.transform(fila)\n","  explainer = shap.TreeExplainer(clf)\n","  shap_values = explainer(datos_trans)\n","  fig, ax = plt.subplots()\n","  shap.plots.bar(shap_values[0],max_display=10)\n","  ax.set_title(\"Importancia de las variables - XGBoost\")\n","  st.pyplot(fig)\n","  plt.close(fig)\n"]}],"metadata":{"colab":{"provenance":[],"mount_file_id":"17eua6_spCx9A7D_pDAXLF0xLRXdCYe03","authorship_tag":"ABX9TyPhfblnzZcC72VxOQrzERXS"},"kernelspec":{"display_name":"Python 3","name":"python3"},"language_info":{"name":"python"}},"nbformat":4,"nbformat_minor":0}
+# -*- coding: utf-8 -*-
+"""app.py
+
+Automatically generated by Colab.
+
+Original file is located at
+    https://colab.research.google.com/drive/17eua6_spCx9A7D_pDAXLF0xLRXdCYe03
+
+# Aplicación Proyecto Final
+"""
+
+import joblib
+import numpy as np
+import pandas as pd
+import streamlit as st
+import shap
+import matplotlib.pyplot as plt
+from pathlib import Path
+import tensorflow as tf
+import os
+
+
+#Configuración sitio
+st.set_page_config(
+    page_title="Predicción con Machine Learning",
+    layout="centered"
+)
+#Funcion para cargar
+
+MODELS_PATH = Path("../models/")
+
+#Valores barrios
+barrios = ['Can Baró', 'Diagonal Mar i el Front Marítim del Poblenou',
+       'Horta', 'Hostafrancs', 'Navas', 'Pedralbes', 'Porta',
+       'Provençals del Poblenou', 'Sant Andreu', 'Sant Antoni',
+       'Sant Gervasi - Galvany', 'Sant Gervasi - la Bonanova',
+       'Sant Martí de Provençals',
+       'Sant Pere, Santa Caterina i la Ribera', 'Sants', 'Sants - Badal',
+       'Sarrià', 'Vallcarca i els Penitents',
+       'Vallvidrera, el Tibidabo i les Planes',
+       'Vilapicina i la Torre Llobeta', 'el Baix Guinardó',
+       'el Barri Gòtic', 'el Besòs i el Maresme',
+       "el Camp d'en Grassot i Gràcia Nova", "el Camp de l'Arpa del Clot",
+       'el Carmel', 'el Clot', 'el Coll', 'el Congrés i els Indians',
+       'el Fort Pienc', 'el Guinardó',
+       'el Parc i la Llacuna del Poblenou', 'el Poble Sec', 'el Poblenou',
+       'el Putxet i el Farró', 'el Raval', 'el Turó de la Peira',
+       "l'Antiga Esquerra de l'Eixample", 'la Barceloneta', 'la Bordeta',
+       "la Dreta de l'Eixample", "la Font d'en Fargues",
+       'la Font de la Guatlla', 'la Guineueta', 'la Marina de Port',
+       'la Maternitat i Sant Ramon', "la Nova Esquerra de l'Eixample",
+       'la Prosperitat', 'la Sagrada Família', 'la Sagrera', 'la Salut',
+       'la Teixonera', 'la Verneda i la Pau',
+       'la Vila Olímpica del Poblenou', 'la Vila de Gràcia', 'les Corts',
+       'les Roquetes', 'les Tres Torres']
+
+#Cargar Modelos
+ruta_xgb = MODELS_PATH / "xgboost_final.joblib"
+
+modelo_xgb = joblib.load(ruta_xgb)
+
+#Interfaz
+st.title("Aplicación de Predicción")
+st.write(
+    "Introduce los datos para obtener una predicción "
+    "utilizando los modelos entrenados."
+)
+
+with st.form("Barrio"):
+  Lag_7 = st.number_input("Ocupación hace 7 días", 0.0, 1.0, 0.4)
+  Lag_14 = st.number_input("Ocupación hace 14 días", 0.0, 1.0, 0.4)
+  Lag_28 = st.number_input("Ocupación hace 28 días", 0.0, 1.0, 0.4)
+  mes = st.selectbox(
+        "Mes",
+        options=list(range(1, 13)),
+        format_func=lambda x: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][x - 1]
+    )
+
+  dia_semana = st.selectbox(
+        "Día de la semana",
+        options=list(range(7)),
+        format_func=lambda x: ["Lunes", "Martes", "Miércoles", "Jueves","Viernes", "Sábado", "Domingo"][x]
+    )
+  neighbourhood_cleansed = st.selectbox("Barrio", options=barrios)
+  enviar = st.form_submit_button("Predecir")
+
+
+#Predecir en caso de que usuario envie los datos
+if enviar:
+  fila = pd.DataFrame([{
+      "lag_7": Lag_7,
+      "lag_14": Lag_14,
+      "lag_28": Lag_28,
+      "day_of_week": mes,
+      "month": dia_semana,
+      "neighbourhood_cleansed": neighbourhood_cleansed
+
+  }])
+
+  #Predicción XGBoost
+  pred_xgb = modelo_xgb.predict(fila)
+  pre = modelo_xgb.named_steps["preprocessor"]
+  clf = modelo_xgb.named_steps["model"]
+
+
+  #Recultados
+  st.subheader("Resultados")
+  st.metric("Predicción XGBoost:", f"{pred_xgb}:.1%")
+
+  #SHAP Values
+  datos_trans = pre.transform(fila)
+  explainer = shap.TreeExplainer(clf)
+  shap_values = explainer(datos_trans)
+  fig, ax = plt.subplots()
+  shap.plots.bar(shap_values[0],max_display=10)
+  ax.set_title("Importancia de las variables - XGBoost")
+  st.pyplot(fig)
+  plt.close(fig)
