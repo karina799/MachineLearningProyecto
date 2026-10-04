@@ -29,14 +29,7 @@ st.set_page_config(
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ruta_xgb = BASE_DIR / "models" / "modelo_xgb.joblib"
-
-st.write("BASE_DIR:", BASE_DIR)
-st.write("Ruta del modelo:", ruta_xgb)
-st.write("¿Existe?:", ruta_xgb.exists())
-
-st.write("Archivos en BASE_DIR:")
-st.write(list(BASE_DIR.iterdir()))
+ruta_xgb = BASE_DIR / "models" / "xgboost_final.joblib"
 
 models_dir = BASE_DIR / "models"
 
