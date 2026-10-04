@@ -27,7 +27,15 @@ st.set_page_config(
 )
 #Funcion para cargar
 
-MODELS_PATH = Path("../models/")
+from pathlib import Path
+import joblib
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+ruta_xgb = BASE_DIR / "models" / "modelo_xgb.pkl"
+
+modelo_xgb = joblib.load(ruta_xgb)
+
 
 #Valores barrios
 barrios = ['Can Baró', 'Diagonal Mar i el Front Marítim del Poblenou',
@@ -54,10 +62,6 @@ barrios = ['Can Baró', 'Diagonal Mar i el Front Marítim del Poblenou',
        'la Vila Olímpica del Poblenou', 'la Vila de Gràcia', 'les Corts',
        'les Roquetes', 'les Tres Torres']
 
-#Cargar Modelos
-ruta_xgb = MODELS_PATH / "xgboost_final.joblib"
-
-modelo_xgb = joblib.load(ruta_xgb)
 
 #Interfaz
 st.title("Aplicación de Predicción")
