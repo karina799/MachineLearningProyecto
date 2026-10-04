@@ -99,13 +99,14 @@ if enviar:
 
   #Predicción XGBoost
   pred_xgb = modelo_xgb.predict(fila)
+  probabilidad = float(np.asarray(pred_xgb).ravel()[0])
   pre = modelo_xgb.named_steps["preprocessor"]
   clf = modelo_xgb.named_steps["model"]
 
 
   #Recultados
   st.subheader("Resultados")
-  st.metric("Predicción XGBoost:", f"{pred_xgb}:.1%")
+  st.metric("Predicción XGBoost:", f"{probabilidad}:.1%")
 
   #SHAP Values
   datos_trans = pre.transform(fila)
