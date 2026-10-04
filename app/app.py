@@ -31,11 +31,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 ruta_xgb = BASE_DIR / "models" / "modelo_xgb.joblib"
 
-modelo_xgb = joblib.load(ruta_xgb)
-
 st.write("BASE_DIR:", BASE_DIR)
-st.write("Modelo:", ruta_xgb)
-st.write("Existe:", ruta_xgb.exists())
+st.write("Ruta del modelo:", ruta_xgb)
+st.write("¿Existe?:", ruta_xgb.exists())
+
+st.write("Archivos en BASE_DIR:")
+st.write(list(BASE_DIR.iterdir()))
+
+models_dir = BASE_DIR / "models"
+
+if models_dir.exists():
+    st.write("Archivos en models:")
+    st.write(list(models_dir.iterdir()))
+
+if not ruta_xgb.exists():
+    st.error("No se encontró modelo_xgb.joblib")
+    st.stop()
+
+modelo_xgb = joblib.load(ruta_xgb)
 
 #Valores barrios
 barrios = ['Can Baró', 'Diagonal Mar i el Front Marítim del Poblenou',
